@@ -35,4 +35,10 @@ fn main() {
     println!("The yaml is: {:?}", output);
     fs::write(&file_path, &output).unwrap();
     println!("written to: {:?}", &file_path);
+
+    //read from file
+    let input = fs::read_to_string(&file_path).unwrap();
+    let new_jobs: JobList = serde_yaml_ng::from_str(&input).unwrap();
+    println!("The jobs from the file:\n{:?}", new_jobs);
+    println!("The first job:\n{:?}", new_jobs.jobs[0]);
 }
