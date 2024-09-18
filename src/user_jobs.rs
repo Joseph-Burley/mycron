@@ -12,7 +12,13 @@ pub struct Job {
     pub params: JobParams,
 }
 
-#[derive(Debug, Serialize,Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct JobList {
     pub jobs: Vec<Job>,
+}
+
+impl JobList {
+    pub fn find_name(&self, n: &str) -> Option<&Job>{
+        self.jobs.iter().find(|&i| i.name.eq(n))
+    }
 }

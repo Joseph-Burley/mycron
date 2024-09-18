@@ -13,7 +13,7 @@ use chrono::{FixedOffset, Local, TimeZone, Utc};
 fn main() {
     println!("Hello, world!");
 
-    let data_dir = ProjectDirs::from("com", "mycrom", "mycron").unwrap();
+    let data_dir = ProjectDirs::from("com", "mycron", "mycron").unwrap();
     let params_1 = JobParams {path: String::from("ls ~/Documents")};
     let job_1 = Job {name: String::from("List Documents"), timing: String::from("* * * * * * *"), params: params_1};
 
