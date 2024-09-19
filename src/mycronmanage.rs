@@ -31,10 +31,19 @@ struct NewJob {
     minute: Option<String>,
 }
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct RemoveJob {
+    #[arg(short, long)]
+    name: String
+}
+
 #[derive(Debug, Subcommand)]
 enum Clisub {
     Edit(EditJob),
     New(NewJob),
+    Remove(RemoveJob),
+    List,
 }
 
 #[derive(Parser, Debug)]
@@ -73,7 +82,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
         Clisub::New(j) => {
             println!("Creating a new job: {:?}", j);
-        }
+        },
+        Clisub::Remove(j) => {
+            println!("Removing job {}", j.name);
+        },
+        Clisub::List => {
+            let job_list = load_from_file()?;
+            let name_list: Vec<String> = job_list.jobs.iter().map(
+                |x| format!("{}: {}", x.name, x.timing)).collect();
+            println!("List of jobs:\n\t{}", name_list.join(",\n\t"));
+        },
     }
 
     println!("loading jobs from file");
