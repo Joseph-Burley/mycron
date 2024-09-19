@@ -65,6 +65,18 @@ fn load_from_file() -> Result<JobList, Box<dyn Error>> {
     return Result::Ok(jobs);
 }
 
+fn write_to_file(jl: JobList) -> Result<(), Box<dyn Error>> {
+    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
+        None => {return Result::Err(String::from("Could not find project directory").into())},
+        Some(f) => f
+    };
+    let mut file = PathBuf::from(data_dir.data_dir());
+    file.push("list.yaml");
+    let output = serde_yaml_ng::to_string(&jl)?;
+    fs::write(&file, &output)?;
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello world");
     let args = Args::parse();
@@ -82,6 +94,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
         Clisub::New(j) => {
             println!("Creating a new job: {:?}", j);
+            let mut jl = load_from_file()?;
+            let new_job = Job::new(&j.name);
+            jl.jobs.push(new_job);
+            write_to_file(jl)?;
         },
         Clisub::Remove(j) => {
             println!("Removing job {}", j.name);
@@ -94,9 +110,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
     }
 
+    /*
     println!("loading jobs from file");
     let job_list = load_from_file()?;
     println!("{:?}", job_list);
-    
+    */
     Ok(())
 }

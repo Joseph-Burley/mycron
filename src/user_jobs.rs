@@ -1,8 +1,17 @@
+use clap::builder::Str;
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {
     pub path: String,
+}
+
+impl Default for JobParams {
+    fn default() -> Self {
+        JobParams {
+            path: String::from("")
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -11,6 +20,26 @@ pub struct Job {
     pub timing: String,
     pub params: JobParams,
 }
+
+impl Job {
+    pub fn new(n: &str) -> Job {
+        Job {
+            name: n.to_string(),
+            timing: String::from("0 * * * * * *"),
+            params: JobParams::default()
+        }
+    }
+}
+
+/*
+impl Default for Job {
+    fn default() -> Self {
+        Job {
+            timing: String::from("0 * * * * * *");
+        }
+    }
+}
+*/
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct JobList {
