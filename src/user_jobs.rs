@@ -31,16 +31,6 @@ impl Job {
     }
 }
 
-/*
-impl Default for Job {
-    fn default() -> Self {
-        Job {
-            timing: String::from("0 * * * * * *");
-        }
-    }
-}
-*/
-
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct JobList {
     pub jobs: Vec<Job>,
@@ -49,5 +39,9 @@ pub struct JobList {
 impl JobList {
     pub fn find_name(&self, n: &str) -> Option<&Job>{
         self.jobs.iter().find(|&i| i.name.eq(n))
+    }
+
+    pub fn find_name_index(&self, n: &str) -> Option<usize> {
+        self.jobs.iter().position(|i| i.name.eq(n))
     }
 }

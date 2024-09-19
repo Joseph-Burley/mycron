@@ -100,7 +100,15 @@ fn main() -> Result<(), Box<dyn Error>> {
             write_to_file(jl)?;
         },
         Clisub::Remove(j) => {
-            println!("Removing job {}", j.name);
+            let mut jl = load_from_file()?;
+            let job_index = jl.find_name_index(&j.name);
+            match job_index {
+                None => println!("Job not found in list"),
+                Some(i) => {
+                    jl.jobs.remove(i);
+                }
+            }
+            write_to_file(jl)?;
         },
         Clisub::List => {
             let job_list = load_from_file()?;
