@@ -15,10 +15,10 @@ fn main() {
 
     let data_dir = ProjectDirs::from("com", "mycron", "mycron").unwrap();
     let params_1 = JobParams {path: String::from("ls ~/Documents")};
-    let job_1 = Job {name: String::from("List Documents"), timing: String::from("* * * * * * *"), params: params_1};
+    let job_1 = Job {name: String::from("List Documents"), timing: Timing::default(), params: params_1};
 
     let params_2 = JobParams {path: String::from("ls ~/videos")};
-    let job_2 = Job {name: String::from("List Videos"), timing: String::from("* * * * * * *"), params: params_2};
+    let job_2 = Job {name: String::from("List Videos"), timing: Timing::default(), params: params_2};
 
     let job_list = JobList {jobs: vec![job_1, job_2]};
 

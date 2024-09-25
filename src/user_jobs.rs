@@ -1,5 +1,7 @@
+use std::fmt;
 use clap::builder::Str;
 use serde::{Serialize, Deserialize};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {
@@ -14,10 +16,68 @@ impl Default for JobParams {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, Getters, Setters)]
+pub struct Timing {
+    #[getset(get = "pub", set = "pub")]
+    second: String,
+
+    #[getset(get = "pub", set = "pub")]
+    minute: String,
+
+    #[getset(get = "pub", set = "pub")]
+    hour: String,
+
+    #[getset(get = "pub", set = "pub")]
+    dom: String,
+
+    #[getset(get = "pub", set = "pub")]
+    dow: String,
+
+    #[getset(get = "pub", set = "pub")]
+    month: String,
+
+    #[getset(get = "pub", set = "pub")]
+    year: String,
+}
+
+impl Default for Timing {
+    fn default() -> Self {
+        Timing {
+            second: String::from("0"),
+            minute: String::from("*"),
+            hour: String::from("*"),
+            dom: String::from("*"),
+            dow: String::from("*"),
+            month: String::from("*"),
+            year: String::from("*"),
+        }
+    }
+}
+
+impl fmt::Display for Timing {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {} {} {} {}", self.minute, self.hour, self.dom, self.dow, self.month)
+    } 
+}
+
+
+impl Timing {
+    pub fn full_timing(&self) -> String {
+        format!("{} {} {} {} {} {} {}", self.second,
+                                        self.minute,
+                                        self.hour,
+                                        self.dom,
+                                        self.dow,
+                                        self.month,
+                                        self.year)
+    }
+}
+
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Job {
     pub name: String,
-    pub timing: String,
+    pub timing: Timing,
     pub params: JobParams,
 }
 
@@ -25,7 +85,7 @@ impl Job {
     pub fn new(n: &str) -> Job {
         Job {
             name: n.to_string(),
-            timing: String::from("0 * * * * * *"),
+            timing: Timing::default(),
             params: JobParams::default()
         }
     }
@@ -39,6 +99,11 @@ pub struct JobList {
 impl JobList {
     pub fn find_name(&self, n: &str) -> Option<&Job>{
         self.jobs.iter().find(|&i| i.name.eq(n))
+    }
+
+    pub fn find_name_mut(&mut self, n: &str) -> Option<&mut Job>{
+        self.jobs.iter_mut().find(|i| i.name.eq(n))
+        
     }
 
     pub fn find_name_index(&self, n: &str) -> Option<usize> {

@@ -19,6 +19,8 @@ struct EditJob {
 
     #[arg(long)]
     minute: Option<String>,
+    #[arg(long)]
+    hour: Option<String>,
 }
 
 #[derive(Parser, Debug)]
@@ -77,18 +79,55 @@ fn write_to_file(jl: JobList) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn check_file() -> Result<bool, Box<dyn Error>> {
+    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
+        None => {return Result::Err(String::from("Could not find project directory").into())},
+        Some(f) => f
+    };
+    let mut file = PathBuf::from(data_dir.data_dir());
+    file.push("list.yaml");
+    return Ok(file.exists());
+}
+
+fn create_blank_file() -> Result<(), Box<dyn Error>> {
+    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
+        None => {return Result::Err(String::from("Could not find project directory").into())},
+        Some(f) => f
+    };
+    let mut file = PathBuf::from(data_dir.data_dir());
+    file.push("list.yaml");
+    let job_list = JobList::default();
+    fs::write(file, "")?;
+    write_to_file(job_list)?;
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello world");
     let args = Args::parse();
 
+    if !check_file()? {
+        create_blank_file()?;
+    }
+
     match args.subcommand {
         Clisub::Edit(j) => {
             println!("Editing a job: {:?}", j);
-            let jl = load_from_file()?;
-            let job = jl.find_name(&j.name);
+            let mut jl = load_from_file()?;
+            let job = jl.find_name_mut(&j.name);
             match job {
                 None => println!("The job {} was not found", j.name),
-                Some(j) => println!("Editing job")
+                Some(actualjob) => {
+                    if j.minute.is_some() {
+                        actualjob.timing.set_minute(j.minute.unwrap());
+                    }
+
+                    if j.hour.is_some() {
+                        actualjob.timing.set_hour(j.hour.unwrap());
+                    }
+
+                    write_to_file(jl)?;
+                }
             };
 
         },
@@ -112,6 +151,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
         Clisub::List => {
             let job_list = load_from_file()?;
+
             let name_list: Vec<String> = job_list.jobs.iter().map(
                 |x| format!("{}: {}", x.name, x.timing)).collect();
             println!("List of jobs:\n\t{}", name_list.join(",\n\t"));

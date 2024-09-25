@@ -10,7 +10,7 @@ use crate::Job;
 
 
 pub fn create_job(job: Job, cron: &mut Cron<Utc>) {
-    cron.add_fn(&job.timing, move || execute_job(&job.params.path)).unwrap();
+    cron.add_fn(&job.timing.full_timing(), move || execute_job(&job.params.path)).unwrap();
 }
 
 /*
