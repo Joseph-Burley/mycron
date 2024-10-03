@@ -1,18 +1,26 @@
-use std::fmt;
+use std::fmt::{self, write, Display};
 use clap::builder::Str;
 use serde::{Serialize, Deserialize};
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {
-    pub path: String,
+    pub command: String,
+    pub arguments: Vec<String>,
 }
 
 impl Default for JobParams {
     fn default() -> Self {
         JobParams {
-            path: String::from("")
+            command: String::from(""),
+            arguments: Vec::<String>::new(),
         }
+    }
+}
+
+impl JobParams {
+    pub fn full_command(&self) -> String {
+        format!("{} {}", self.command, self.arguments.join(" "))
     }
 }
 
@@ -88,6 +96,12 @@ impl Job {
             timing: Timing::default(),
             params: JobParams::default()
         }
+    }
+}
+
+impl fmt::Display for Job {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {} {}", self.name, self.timing, self.params.full_command())
     }
 }
 

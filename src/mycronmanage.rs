@@ -21,6 +21,13 @@ struct EditJob {
     minute: Option<String>,
     #[arg(long)]
     hour: Option<String>,
+
+    #[arg(short, long)]
+    command: Option<String>,
+
+    //this should allow for multiple arguments, but does not for some reason.
+    #[arg(short, long)]
+    setargs: Vec<String>
 }
 
 #[derive(Parser, Debug)]
@@ -126,6 +133,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                         actualjob.timing.set_hour(j.hour.unwrap());
                     }
 
+                    if j.command.is_some() {
+                        actualjob.params.command = j.command.unwrap();
+                    }
+
+                    if j.setargs.len() > 0 {
+                        actualjob.params.arguments = j.setargs;
+                    }
+
                     write_to_file(jl)?;
                 }
             };
@@ -153,7 +168,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let job_list = load_from_file()?;
 
             let name_list: Vec<String> = job_list.jobs.iter().map(
-                |x| format!("{}: {}", x.name, x.timing)).collect();
+                |x| format!("{}", x)).collect();
             println!("List of jobs:\n\t{}", name_list.join(",\n\t"));
         },
     }
