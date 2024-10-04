@@ -1,7 +1,7 @@
-use std::fmt::{self, write, Display};
-use clap::builder::Str;
+use std::fmt::{self};
+
 use serde::{Serialize, Deserialize};
-use getset::{CopyGetters, Getters, MutGetters, Setters};
+use getset::{Getters, Setters};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {

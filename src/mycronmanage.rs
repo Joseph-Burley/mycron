@@ -4,10 +4,10 @@ use std::result::Result;
 use clap::*;
 use user_jobs::*;
 use directories::ProjectDirs;
-use serde_yaml_ng::*;
-use std::fs::{self, File};
-use std::io::Write;
-use std::path::{Path, PathBuf};
+
+use std::fs::{self};
+
+use std::path::{PathBuf};
 
 
 //Structs for parser
@@ -25,8 +25,9 @@ struct EditJob {
     #[arg(short, long)]
     command: Option<String>,
 
-    //this should allow for multiple arguments, but does not for some reason.
-    #[arg(short, long)]
+    //todo: The best way to do this is probably to take a single string and slice it later.
+    //trying to have clap do it runs into issues with flags.
+    #[arg(short, long, value_delimiter=',', value_terminator=";", num_args=1..)]
     setargs: Vec<String>
 }
 
