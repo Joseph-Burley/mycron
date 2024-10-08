@@ -3,12 +3,9 @@ mod cron_tab_wrapper;
 use cron_tab_wrapper::create_job;
 use user_jobs::*;
 use directories::ProjectDirs;
-use serde_yaml_ng::*;
 use std::fs::{self, File};
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use cron_tab::*;
-use chrono::{FixedOffset, Local, TimeZone, Utc};
+use std::path::PathBuf;
+use chrono::Utc;
 
 fn main() {
     println!("Hello, world!");

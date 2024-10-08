@@ -4,10 +4,8 @@ use std::result::Result;
 use clap::*;
 use user_jobs::*;
 use directories::ProjectDirs;
-
-use std::fs::{self};
-
-use std::path::{PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 
 //Structs for parser
