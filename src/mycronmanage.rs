@@ -21,6 +21,12 @@ struct EditJob {
     minute: Option<String>,
     #[arg(long)]
     hour: Option<String>,
+    #[arg(long)]
+    dow: Option<String>,
+    #[arg(long)]
+    dom: Option<String>,
+    #[arg(long)]
+    month: Option<String>,
 
     #[arg(short, long)]
     command: Option<String>,
@@ -39,6 +45,17 @@ struct NewJob {
 
     #[arg(long)]
     minute: Option<String>,
+    #[arg(long)]
+    hour: Option<String>,
+    #[arg(long)]
+    dow: Option<String>,
+    #[arg(long)]
+    dom: Option<String>,
+    #[arg(long)]
+    month: Option<String>,
+
+    #[arg(short, long)]
+    command: Option<String>,
 }
 
 #[derive(Parser, Debug)]
@@ -134,6 +151,18 @@ fn main() -> Result<(), Box<dyn Error>> {
                         actualjob.timing.set_hour(j.hour.unwrap());
                     }
 
+                    if j.dow.is_some() {
+                        actualjob.timing.set_dow(j.dow.unwrap());
+                    }
+
+                    if j.dom.is_some() {
+                        actualjob.timing.set_dom(j.dom.unwrap());
+                    }
+
+                    if j.month.is_some() {
+                        actualjob.timing.set_month(j.month.unwrap());
+                    }
+
                     if j.command.is_some() {
                         actualjob.params.command = j.command.unwrap();
                     }
@@ -150,7 +179,31 @@ fn main() -> Result<(), Box<dyn Error>> {
         Clisub::New(j) => {
             println!("Creating a new job: {:?}", j);
             let mut jl = load_from_file()?;
-            let new_job = Job::new(&j.name);
+            let mut new_job = Job::new(&j.name);
+
+            if j.minute.is_some() {
+                new_job.timing.set_minute(j.minute.unwrap());
+            }
+            
+            if j.hour.is_some() {
+                new_job.timing.set_hour(j.hour.unwrap());
+            }
+
+            if j.dow.is_some() {
+                new_job.timing.set_dow(j.dow.unwrap());
+            }
+
+            if j.dom.is_some() {
+                new_job.timing.set_dom(j.dom.unwrap());
+            }
+
+            if j.month.is_some() {
+                new_job.timing.set_month(j.month.unwrap());
+            }
+
+            if j.command.is_some() {
+                new_job.params.command = j.command.unwrap();
+            }
             jl.jobs.push(new_job);
             write_to_file(jl)?;
         },
