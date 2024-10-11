@@ -177,11 +177,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                     if j.log.is_some() {
                         let p = PathBuf::from(j.log.unwrap());
-                        if p.exists() {
-                            actualjob.params.set_log(&p);
-                        } else {
-                            println!("Invalid log path");
+                        if !p.exists() {
+                            fs::File::create_new(&p).unwrap();
                         }
+                        actualjob.params.set_log(&p);
                     }
 
                     write_to_file(jl)?;
@@ -220,11 +219,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             if j.log.is_some() {
                 let p = PathBuf::from(j.log.unwrap());
-                if p.exists() {
-                    new_job.params.set_log(&p);
-                } else {
-                    println!("Invalid log path");
+                if !p.exists() {
+                    fs::File::create_new(&p).unwrap();
                 }
+                new_job.params.set_log(&p);
             }
 
             jl.jobs.push(new_job);
