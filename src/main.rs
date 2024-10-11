@@ -34,6 +34,7 @@ fn main() {
     }
 
     cron.start();
-    std::thread::sleep(std::time::Duration::from_secs(20));
-    cron.stop();
+    std::thread::park();
+    //std::thread::sleep(std::time::Duration::from_secs(20));
+    //cron.stop();
 }

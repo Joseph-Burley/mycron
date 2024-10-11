@@ -8,7 +8,7 @@ use std::path::PathBuf;
 pub struct JobParams {
     pub command: String,
     pub arguments: Vec<String>,
-    log_location: String
+    pub log_location: String
 }
 
 impl Default for JobParams {
