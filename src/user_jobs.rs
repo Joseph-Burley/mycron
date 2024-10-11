@@ -1,26 +1,36 @@
-use std::fmt::{self};
-
+use std::{fmt::{self}, path::Path};
 use serde::{Serialize, Deserialize};
 use getset::{Getters, Setters};
+use directories::{UserDirs, ProjectDirs};
+use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {
     pub command: String,
     pub arguments: Vec<String>,
+    log_location: String
 }
 
 impl Default for JobParams {
     fn default() -> Self {
+        let udir = UserDirs::new().unwrap();
+        let mut def_log = PathBuf::from(udir.home_dir());
+        def_log.push("mycron_logs/default.log");
         JobParams {
             command: String::from(""),
             arguments: Vec::<String>::new(),
+            log_location: String::from(def_log.to_str().unwrap()),
         }
     }
 }
 
 impl JobParams {
     pub fn full_command(&self) -> String {
-        format!("{} {}", self.command, self.arguments.join(" "))
+        format!("{} {}\n\tLog Location: {}", self.command, self.arguments.join(" "), self.log_location)
+    }
+
+    pub fn set_log(&mut self, p: &Path) {
+        self.log_location = String::from(p.to_str().unwrap());
     }
 }
 

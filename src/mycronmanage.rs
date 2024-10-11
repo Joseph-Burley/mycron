@@ -32,7 +32,10 @@ struct EditJob {
     //todo: The best way to do this is probably to take a single string and slice it later.
     //trying to have clap do it runs into issues with flags.
     #[arg(short, long, value_delimiter=',', value_terminator=";", num_args=1..)]
-    setargs: Vec<String>
+    setargs: Vec<String>,
+
+    #[arg(short, long)]
+    log: Option<String>
 }
 
 #[derive(Parser, Debug)]
@@ -54,6 +57,9 @@ struct NewJob {
 
     #[arg(short, long)]
     command: Option<String>,
+
+    #[arg(short, long)]
+    log: Option<String>,
 }
 
 #[derive(Parser, Debug)]
@@ -169,6 +175,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                         actualjob.params.arguments = j.setargs;
                     }
 
+                    if j.log.is_some() {
+                        let p = PathBuf::from(j.log.unwrap());
+                        if p.exists() {
+                            actualjob.params.set_log(&p);
+                        } else {
+                            println!("Invalid log path");
+                        }
+                    }
+
                     write_to_file(jl)?;
                 }
             };
@@ -202,6 +217,16 @@ fn main() -> Result<(), Box<dyn Error>> {
             if j.command.is_some() {
                 new_job.params.command = j.command.unwrap();
             }
+
+            if j.log.is_some() {
+                let p = PathBuf::from(j.log.unwrap());
+                if p.exists() {
+                    new_job.params.set_log(&p);
+                } else {
+                    println!("Invalid log path");
+                }
+            }
+
             jl.jobs.push(new_job);
             write_to_file(jl)?;
         },
