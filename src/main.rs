@@ -6,7 +6,9 @@ use user_jobs::*;
 use directories::ProjectDirs;
 use std::fs::{self, File};
 use std::path::PathBuf;
+use std::thread;
 use chrono::{DateTime, Local, Utc};
+use notify::{Watcher, RecommendedWatcher, RecursiveMode};
 use simplelog::*;
 #[macro_use] extern crate log;
 
@@ -37,8 +39,28 @@ fn main() {
         create_job(j, &mut cron);
     }
 
+    let mut watcher = notify::recommended_watcher(|res| {
+        match res {
+            Ok(event) => {
+                println!("Event detected: {:?}", event);
+            },
+            Err(e) => {
+                println!("Error resolving event: {:?}", e);
+            }
+        }
+    }).unwrap();
+
+    //currently this kind of works. the watch handler will need to manually filter out events and files it doesn't need.
+    //maybe move all this into a separate file for easy use?
+    let mut watch_file = file_path.clone();
+    watch_file.pop(); //this will make the watcher watch every file in the directory
+    let watch_thread = thread::spawn(move || {
+        watcher.watch(&watch_file, RecursiveMode::Recursive).unwrap();
+        thread::park();
+    });
     cron.start();
-    std::thread::park();
+    watch_thread.join().unwrap();
+    //std::thread::park();
     //std::thread::sleep(std::time::Duration::from_secs(20));
     //cron.stop();
 }
