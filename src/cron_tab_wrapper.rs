@@ -6,6 +6,7 @@ use std::process::Command;
 use std::fs;
 use std::path::PathBuf;
 use std::error::Error;
+use crate::user_jobs::*;
 
 //let utc_tz = Utc;
 
@@ -45,4 +46,24 @@ fn execute_job(name: &String, params: &JobParams) -> core::result::Result<(), Bo
     }
     
     Ok(())
+}
+
+pub fn init_cron(job_file: &PathBuf) -> Cron<Utc> {
+    debug!("started reading from file");
+    //read from file
+    let input = fs::read_to_string(&job_file).unwrap();
+    let new_jobs: JobList = serde_yaml_ng::from_str(&input).unwrap();
+    debug!("Job count: {}", new_jobs.jobs.len());
+    debug!("creating crontabs");
+    let mut cron = cron_tab::Cron::new(Utc);
+    for j in new_jobs.jobs {
+        create_job(j, &mut cron);
+    }
+
+    cron.start();
+    return cron;
+}
+
+pub fn stop_cron(c: &Cron<Utc>) {
+    c.stop();
 }
