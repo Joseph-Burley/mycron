@@ -1,7 +1,7 @@
 use std::{fmt::{self}, path::Path};
 use serde::{Serialize, Deserialize};
 use getset::{Getters, Setters};
-use directories::{UserDirs, ProjectDirs};
+use directories::UserDirs;
 use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize)]

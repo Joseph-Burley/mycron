@@ -2,8 +2,8 @@
 pub mod file_watcher {
     use std::{path::PathBuf, sync::mpsc::Sender};
     use std::thread;
-    use std::sync::mpsc;
-    use notify::{event::{AccessKind, AccessMode}, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher, WatcherKind};
+    //use std::sync::mpsc;
+    use notify::{event::{AccessKind, AccessMode}, Event, EventKind, RecursiveMode, Watcher};
 
     pub fn start_watch(file_path: &PathBuf, channel: Sender<u32>) {
         let list_file = file_path.clone();
@@ -31,11 +31,9 @@ pub mod file_watcher {
             }
         }).unwrap();
     
-        let watch_thread = thread::spawn(move || {
+        let _watch_thread = thread::spawn(move || {
             watcher.watch(&watch_file, RecursiveMode::Recursive).unwrap();
             thread::park();
         });
-
-        //watch_thread.join().unwrap();
     }
 }

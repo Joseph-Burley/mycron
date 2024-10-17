@@ -12,7 +12,7 @@ path = "src/mycronmanage.rs"
 [dependencies]
 chrono = "0.4.38"
 clap = { version = "4.5.17", features = ["derive"] }
-cron_tab = { version = "0.2.2", features = ["all"] }
+cron_tab = { version = "0.2.3", features = ["all"] }
 directories = "5.0.1"
 getset = "0.1.3"
 log = "0.4.22"
