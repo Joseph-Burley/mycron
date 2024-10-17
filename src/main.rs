@@ -28,6 +28,9 @@ fn main() {
         File::create(&file_path).unwrap();
     }
     //TODO create file with no jobs if none exists
+    //TODO check if mycron is already running
+    //TODO allow for multiple list files
+    //TODO add default log location for jobs (mycronmanage?)
 
 
     let (tx, rx) = mpsc::channel::<u32>();
