@@ -25,7 +25,11 @@ fn main() {
     }
     file_path.push("list.yaml");
     if !file_path.exists(){
+        info!("List file does not exist. Creating blank file");
         File::create(&file_path).unwrap();
+        let empty_job_list = JobList::default();
+        let output = serde_yaml_ng::to_string(&empty_job_list).unwrap();
+        fs::write(&file_path, &output).unwrap();
     }
     //TODO create file with no jobs if none exists
     //TODO check if mycron is already running
