@@ -44,10 +44,11 @@ fn main() {
         let output = serde_yaml_ng::to_string(&empty_job_list).unwrap();
         fs::write(&file_path, &output).unwrap();
     }
-    //TODO create file with no jobs if none exists
-    //TODO check if mycron is already running
+    //TODO create file with no jobs if none exists DONE
+    //TODO check if mycron is already running DONE
     //TODO allow for multiple list files
     //TODO add default log location for jobs (mycronmanage?)
+    //TODO change log format to use date-time (set_time_level)
 
 
     let (tx, rx) = mpsc::channel::<u32>();
