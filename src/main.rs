@@ -1,5 +1,6 @@
 mod user_jobs;
 mod cron_tab_wrapper;
+mod settings;
 extern crate simplelog;
 use cron_tab_wrapper::create_job;
 use user_jobs::*;
@@ -16,6 +17,11 @@ use simplelog::*;
 
 fn main() {
     println!("The current process is: {}", process::id());
+
+    /*
+    let s = settings::Settings::default();
+    println!("{}", s.job_log);
+    */
     
     let data_dir = ProjectDirs::from("com", "mycron", "mycron").unwrap();
 
