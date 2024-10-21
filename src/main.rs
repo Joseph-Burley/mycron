@@ -10,6 +10,7 @@ use std::sync::mpsc;
 use std::process;
 use chrono:: Utc;
 use mycron::file_watcher::start_watch;
+use mycron::Signal;
 use simplelog::*;
 #[macro_use] extern crate log;
 
@@ -30,7 +31,12 @@ fn main() {
     let mut log_path = PathBuf::from(data_dir.data_dir());
     log_path.push("mycron_log.log");
     let log_file = File::options().append(true).create(true).open(log_path).unwrap();
-    let _ = WriteLogger::init(LevelFilter::Debug, Config::default(), log_file).unwrap();
+    let config = ConfigBuilder::default()
+        .set_time_format_rfc3339()
+        .set_time_level(LevelFilter::Error)
+        .build();
+    let _ = WriteLogger::init(LevelFilter::Debug, config, log_file).unwrap();
+
     let mut file_path = PathBuf::from(data_dir.data_dir());
     //does the directory exist
     if !file_path.exists(){
@@ -48,10 +54,11 @@ fn main() {
     //TODO check if mycron is already running DONE
     //TODO allow for multiple list files
     //TODO add default log location for jobs (mycronmanage?)
-    //TODO change log format to use date-time (set_time_level)
+    //TODO change log format to use date-time (set_time_level) DONE
+    //TODO use enums for thread signaling instead of integers DONE
 
 
-    let (tx, rx) = mpsc::channel::<u32>();
+    let (tx, rx) = mpsc::channel::<Signal>();
     let other_tx = tx.clone();
     start_watch(&file_path, tx);
 
@@ -59,10 +66,11 @@ fn main() {
     let mut job_handles: Vec<usize> = Vec::new();
     let mut should_continue = true;
     ctrlc::set_handler(move || {
-        other_tx.send(1).unwrap();
+        other_tx.send(Signal::Stop).unwrap();
         let _ = fs::remove_file(&pid_path);
     })
     .expect("Error setting Ctrl-C handler");
+
     while should_continue {
         println!("Starting cron");
 
@@ -87,7 +95,23 @@ fn main() {
         let rec = rx.recv();
         match rec {
             Ok(val) => {
-                println!("got number: {}", val);
+                println!("got signal: {:?}", val);
+                match val {
+                    Signal::Reload => {
+                        info!("reloading cron");
+                        cron.stop();
+                        debug!("removing jogs");
+                        for i in job_handles.drain(..) {
+                            debug!("removing job: {}", i);
+                            cron.remove(i);
+                        }
+                    },
+                    Signal::Stop => {
+                        info!("stopping");
+                        should_continue = false;
+                    }
+                }
+                /*
                 if val == 42 {
                     println!("stopping");
                     info!("stopping cron");
@@ -100,6 +124,7 @@ fn main() {
                 } else if val == 1 {
                     should_continue = false;
                 }
+                */
             },
             Err(e) => {
                 println!("got error: {:?}", e);

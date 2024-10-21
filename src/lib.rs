@@ -1,11 +1,11 @@
-
 pub mod file_watcher {
     use std::{path::PathBuf, sync::mpsc::Sender};
     use std::thread;
     //use std::sync::mpsc;
     use notify::{event::{AccessKind, AccessMode}, Event, EventKind, RecursiveMode, Watcher};
+    use crate::Signal; 
 
-    pub fn start_watch(file_path: &PathBuf, channel: Sender<u32>) {
+    pub fn start_watch(file_path: &PathBuf, channel: Sender<Signal>) {
         let list_file = file_path.clone();
         let mut watch_file = file_path.clone();
         watch_file.pop(); //this will make the watcher watch every file in the directory
@@ -21,7 +21,7 @@ pub mod file_watcher {
                         //println!("write detected on paths: [{:?}]", event.paths);
                         if event.paths.contains(&list_file) {
                             //println!("list.yaml edited");
-                            channel.send(42).expect("could not send number");
+                            channel.send(Signal::Reload).expect("could not send number");
                         }
                     }
                 },
@@ -36,4 +36,10 @@ pub mod file_watcher {
             thread::park();
         });
     }
+}
+
+#[derive(Debug)]
+pub enum Signal {
+    Reload,
+    Stop,
 }
