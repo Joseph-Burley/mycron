@@ -33,7 +33,8 @@ fn main() {
         return;
     }
     let _ = fs::write(&pid_path, format!("{}\n", process::id()));
-    
+
+    //most of what follows could be replaced by the settings module
     let mut log_path = PathBuf::from(data_dir.data_dir());
     log_path.push("mycron_log.log");
     let log_file = File::options().append(true).create(true).open(log_path).unwrap();
@@ -87,7 +88,7 @@ fn main() {
         debug!("Job count: {}", new_jobs.jobs.len());
         debug!("creating crontabs");
         
-        
+        //TODO maybe add default log location?
         for j in new_jobs.jobs {
             match create_job(j, &mut cron) {
                 Ok(h) => job_handles.push(h),
@@ -117,27 +118,11 @@ fn main() {
                         should_continue = false;
                     }
                 }
-                /*
-                if val == 42 {
-                    println!("stopping");
-                    info!("stopping cron");
-                    cron.stop();
-                    debug!("removing jobs");
-                    for i in job_handles.drain(..) {
-                        debug!("removing job: {}", i);
-                        cron.remove(i);
-                    }
-                } else if val == 1 {
-                    should_continue = false;
-                }
-                */
             },
             Err(e) => {
                 println!("got error: {:?}", e);
             }
         }
     }
-
     cron.stop();
-
 }
