@@ -3,6 +3,7 @@ mod cron_tab_wrapper;
 mod settings;
 extern crate simplelog;
 use cron_tab_wrapper::create_job;
+use settings::Settings;
 use user_jobs::*;
 use directories::ProjectDirs;
 use std::fs::{self, File};
@@ -18,13 +19,7 @@ use simplelog::*;
 fn main() {
     println!("The current process is: {}", process::id());
 
-    /*
-    let s = settings::Settings::default();
-    println!("{}", s.job_log);
-    */
-    
     let data_dir = ProjectDirs::from("com", "mycron", "mycron").unwrap();
-
     let mut pid_path = PathBuf::from(data_dir.data_dir());
     pid_path.push(".pid");
     if pid_path.exists() {
@@ -34,9 +29,17 @@ fn main() {
     }
     let _ = fs::write(&pid_path, format!("{}\n", process::id()));
 
-    //most of what follows could be replaced by the settings module
-    let mut log_path = PathBuf::from(data_dir.data_dir());
-    log_path.push("mycron_log.log");
+    //load system settings
+    let system_settings = match Settings::load_settings(){
+        Ok(s) => s,
+        Err(e) => {
+            println!("Error loading settings. Using default. {:?}", e);
+            Settings::default()
+        }
+    };
+
+    //set up logging
+    let log_path = system_settings.get_system_log();
     let log_file = File::options().append(true).create(true).open(log_path).unwrap();
     let config = ConfigBuilder::default()
         .set_time_format_rfc3339()
@@ -44,6 +47,9 @@ fn main() {
         .build();
     let _ = WriteLogger::init(LevelFilter::Debug, config, log_file).unwrap();
 
+    debug!("system settings: {:?}", &system_settings);
+
+    //load job lists
     let mut file_path = PathBuf::from(data_dir.data_dir());
     //does the directory exist
     if !file_path.exists(){
@@ -59,7 +65,7 @@ fn main() {
     }
     //TODO create file with no jobs if none exists DONE
     //TODO check if mycron is already running DONE
-    //TODO allow for multiple list files
+    //TODO allow for multiple list files (abandoned)
     //TODO add default log location for jobs (mycronmanage?)
     //TODO change log format to use date-time (set_time_level) DONE
     //TODO use enums for thread signaling instead of integers DONE
