@@ -1,4 +1,3 @@
-use clap::builder::Str;
 use directories::ProjectDirs;
 use std::path::{Path, PathBuf};
 use std::fs;
@@ -31,6 +30,7 @@ impl Default for Settings {
 }
 
 impl Settings {
+    //modify so functions actually use this
     pub fn get_base_dir() -> Result<String, Box<dyn Error>> {
         let data_dir = match ProjectDirs::from("com", "mycron", "mycron"){
             Some(v) => v,

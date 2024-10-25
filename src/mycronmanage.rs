@@ -1,7 +1,9 @@
 mod user_jobs;
+mod settings;
 use std::error::Error;
 use std::result::Result;
 use clap::*;
+use settings::Settings;
 use user_jobs::*;
 use directories::ProjectDirs;
 use std::fs;
@@ -69,11 +71,23 @@ struct RemoveJob {
     name: String
 }
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct ChangeSettings {
+    #[arg(short, long)]
+    syslog: Option<String>,
+    #[arg(short, long)]
+    joblog: Option<String>,
+    #[arg(short, long)]
+    list: Option<String>,
+}
+
 #[derive(Debug, Subcommand)]
 enum Clisub {
     Edit(EditJob),
     New(NewJob),
     Remove(RemoveJob),
+    Settings(ChangeSettings),
     List,
 }
 
@@ -238,6 +252,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
             write_to_file(jl)?;
+        },
+        Clisub::Settings(s) =>
+        {
+            println!("Editing settings: {:?}", s);
+            //does nothing until I can thing straight
+            let mut current_setting = Settings::load_settings().unwrap();
         },
         Clisub::List => {
             let job_list = load_from_file()?;
