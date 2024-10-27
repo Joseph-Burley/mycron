@@ -78,8 +78,6 @@ struct ChangeSettings {
     syslog: Option<String>,
     #[arg(short, long)]
     joblog: Option<String>,
-    #[arg(short, long)]
-    list: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]
@@ -256,8 +254,36 @@ fn main() -> Result<(), Box<dyn Error>> {
         Clisub::Settings(s) =>
         {
             println!("Editing settings: {:?}", s);
-            //does nothing until I can thing straight
-            let mut current_setting = Settings::load_settings().unwrap();
+            let mut no_error = true;
+            let mut current_setting = Settings::load_settings().unwrap_or_default();
+            if s.syslog.is_some() {
+                let new_log = PathBuf::from(s.syslog.unwrap());
+                match current_setting.set_system_log(&new_log) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        println!("Setting system log failed: {}", e);
+                        no_error = false;
+                    }
+                }
+            }
+
+            if s.joblog.is_some() {
+                let new_log = PathBuf::from(s.joblog.unwrap());
+                match current_setting.set_job_log(&new_log) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        println!("Setting job log location failed: {}", e);
+                        no_error = false;
+                    }
+                }
+            }
+
+            if no_error {
+                Settings::save_settings(&current_setting).unwrap();
+            } else {
+                println!("Errors encountered while applying settings. Settings not changed");
+            }
+            
         },
         Clisub::List => {
             let job_list = load_from_file()?;
