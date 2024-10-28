@@ -96,7 +96,7 @@ fn main() {
         
         //TODO maybe add default log location?
         for j in new_jobs.jobs {
-            match create_job(j, &mut cron) {
+            match create_job(j, &mut cron, &system_settings.get_job_log()) {
                 Ok(h) => job_handles.push(h),
                 Err(e) => {
                     error!("Got an error while adding a cronjob: {:?}", e);
