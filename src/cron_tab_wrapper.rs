@@ -3,7 +3,7 @@ use chrono::Utc;
 use crate::{Job, JobParams};
 use std::process::Command;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::error::Error;
 
 pub fn create_job(job: Job, cron: &mut Cron<Utc>, default_log_loc: &String) -> Result<usize> { //or cron error

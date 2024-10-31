@@ -144,13 +144,16 @@ fn create_blank_file() -> Result<(), Box<dyn Error>> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("Hello world");
     let args = Args::parse();
 
     if !check_file()? {
         create_blank_file()?;
     }
 
+    //if load settings fails (probably because the file doesn't exist) create it.
+    let mut system_settings = Settings::load_settings().or(Settings::create_settings()).unwrap();
+
+    //TODO allow editing a job to use the default log location
     match args.subcommand {
         Clisub::Edit(j) => {
             println!("Editing a job: {:?}", j);
@@ -229,13 +232,21 @@ fn main() -> Result<(), Box<dyn Error>> {
                 new_job.params.command = j.command.unwrap();
             }
 
-            if j.log.is_some() {
-                let p = PathBuf::from(j.log.unwrap());
-                if !p.exists() {
-                    fs::File::create_new(&p).unwrap();
+            let log_path = match j.log {
+                Some(l) => {
+                    let p = PathBuf::from(l);
+                    if !p.exists() {
+                        fs::File::create_new(&p).unwrap();
+                    }
+                    p
+                },
+                None => {
+                    let mut p = PathBuf::from(system_settings.get_job_log());
+                    p.push(format!("{}.log", new_job.name));
+                    p
                 }
-                new_job.params.set_log(&p);
-            }
+            };
+            new_job.params.set_log(&log_path);
 
             jl.jobs.push(new_job);
             write_to_file(jl)?;
@@ -255,6 +266,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
             println!("Editing settings: {:?}", s);
             let mut no_error = true;
+            /*
             let mut current_setting = Settings::load_settings().unwrap_or_default();
             if s.syslog.is_some() {
                 let new_log = PathBuf::from(s.syslog.unwrap());
@@ -266,10 +278,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
             }
+            */
 
             if s.joblog.is_some() {
                 let new_log = PathBuf::from(s.joblog.unwrap());
-                match current_setting.set_job_log(&new_log) {
+                match system_settings.set_job_log(&new_log) {
                     Ok(_) => {},
                     Err(e) => {
                         println!("Setting job log location failed: {}", e);
@@ -279,7 +292,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
 
             if no_error {
-                Settings::save_settings(&current_setting).unwrap();
+                Settings::save_settings(&system_settings).unwrap();
             } else {
                 println!("Errors encountered while applying settings. Settings not changed");
             }
@@ -294,10 +307,5 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
     }
 
-    /*
-    println!("loading jobs from file");
-    let job_list = load_from_file()?;
-    println!("{:?}", job_list);
-    */
     Ok(())
 }

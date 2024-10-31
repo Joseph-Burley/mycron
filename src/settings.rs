@@ -1,6 +1,6 @@
 use directories::ProjectDirs;
 use std::path::{Path, PathBuf};
-use std::fs;
+use std::{default, fs};
 use std::error::Error;
 use serde::{Serialize, Deserialize};
 
@@ -68,6 +68,12 @@ impl Settings {
         let output_string = serde_yaml_ng::to_string(&s)?;
         fs::write(settings_path, &output_string)?;
         Ok(())
+    }
+
+    pub fn create_settings() -> Result<Settings, Box<dyn Error>> {
+        let s = Settings::default();
+        Settings::save_settings(&s)?;
+        Ok(s)
     }
 
     pub fn set_system_log(&mut self, p: &Path) -> Result<(), String> {

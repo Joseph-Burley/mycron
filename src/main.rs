@@ -69,6 +69,7 @@ fn main() {
     //TODO add default log location for jobs (mycronmanage?)
     //TODO change log format to use date-time (set_time_level) DONE
     //TODO use enums for thread signaling instead of integers DONE
+    //TODO maybe add default log location? DONE
 
 
     let (tx, rx) = mpsc::channel::<Signal>();
@@ -94,7 +95,6 @@ fn main() {
         debug!("Job count: {}", new_jobs.jobs.len());
         debug!("creating crontabs");
         
-        //TODO maybe add default log location?
         for j in new_jobs.jobs {
             match create_job(j, &mut cron, &system_settings.get_job_log()) {
                 Ok(h) => job_handles.push(h),
