@@ -44,7 +44,7 @@ struct EditJob {
     #[arg(short, long, value_delimiter=',', value_terminator=";", num_args=1..)]
     setargs: Vec<String>,
 
-    ///Set the output location
+    ///Set the output location. Use "default" to use the system default.
     #[arg(short, long)]
     log: Option<String>
 }
@@ -214,7 +214,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
 
                     if j.log.is_some() {
-                        let p = PathBuf::from(j.log.unwrap());
+                        let val = j.log.unwrap();
+                        let p: PathBuf = if val.eq_ignore_ascii_case("default") {
+                            println!("using default log location: {}", system_settings.get_job_log());
+                            PathBuf::from(system_settings.get_job_log())
+                        } else {
+                            PathBuf::from(val)
+                        };
                         if !p.exists() {
                             fs::File::create_new(&p).unwrap();
                         }
