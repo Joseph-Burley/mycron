@@ -11,23 +11,31 @@ use std::path::PathBuf;
 
 
 //Structs for parser
+///Edit a job
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct EditJob {
+    ///The name of the job to edit
     #[arg(short, long)]
     name: String,
 
+    ///Set the minute argument of the cron expression
     #[arg(long)]
     minute: Option<String>,
+    ///Set the hour argument of the cron expression
     #[arg(long)]
     hour: Option<String>,
+    ///Set the day-of-week argument of the cron expression
     #[arg(long)]
     dow: Option<String>,
+    ///Set the day-of-month argument of the cron expression
     #[arg(long)]
     dom: Option<String>,
+    ///Set the month argument of the cron expression
     #[arg(long)]
     month: Option<String>,
 
+    ///The command to run
     #[arg(short, long)]
     command: Option<String>,
 
@@ -36,41 +44,54 @@ struct EditJob {
     #[arg(short, long, value_delimiter=',', value_terminator=";", num_args=1..)]
     setargs: Vec<String>,
 
+    ///Set the output location
     #[arg(short, long)]
     log: Option<String>
 }
 
+///Create a new job
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct NewJob {
+    ///The name of the new job
     #[arg(short, long)]
     name: String,
 
+    ///Set the minute argument of the cron expression
     #[arg(long)]
     minute: Option<String>,
+    ///Set the hour argument of the cron expression
     #[arg(long)]
     hour: Option<String>,
+    ///Set the day-of-week argument of the cron expression
     #[arg(long)]
     dow: Option<String>,
+    ///Set the day-of-month argument of the cron expression
     #[arg(long)]
     dom: Option<String>,
+    ///Set the month argument of the cron expression
     #[arg(long)]
     month: Option<String>,
 
+    ///Set the command to run
     #[arg(short, long)]
     command: Option<String>,
 
+    ///Set the output location
     #[arg(short, long)]
     log: Option<String>,
 }
 
+///Remove a job
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct RemoveJob {
+    ///Name of job to remove
     #[arg(short, long)]
     name: String
 }
 
+///Change the default settings used by mycron
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct ChangeSettings {
@@ -86,9 +107,11 @@ enum Clisub {
     New(NewJob),
     Remove(RemoveJob),
     Settings(ChangeSettings),
+    ///List mycron jobs
     List,
 }
 
+///mycronmanage - Add and edit jobs run by mycron and edit mycron settings
 #[derive(Parser, Debug)]
 struct Args{
     #[command(subcommand)]
