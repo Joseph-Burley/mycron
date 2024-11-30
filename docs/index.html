@@ -13,7 +13,10 @@
       <li>Edit execution time individually by minute, hour, day, and month</li>
       <li>Built-in logging</li>
     </ul>
+    <h2>Motivation</h2>
+    <p>A recent project of mine (soon to be linked and published) utilizes cron running in a docker container. It also requires the ability to edit the crontab programatically without requiring the user to open the file and edit it by hand. This poses a challenge because crontabs are a simple, flat file format that is not supposed to be edited by other programs. The way other people have solved this in the past is by restricting a crontab to only a few jobs in a particular order or adding comment guards so another program can find a particular job within a crontab. The way I solved my issue in the other project was by using a template in mustache format and using <code>sed</code> to find and replace the mustache patterns and essentially rebuild the entire crontab every time it needed to be changed.</p>
+    <p><code>mycron</code> solves this problem by ditching the flat format of a crontab and replacing it with a structured YAML file (I had originally planned to use JSON, but I wanted it to be easily legible by humans). This allows an editor (in this project called <code>mycronmanage</code>) to easily serialize and deserialize the job list and make small changes. This in turn allows for a number of quality of life features that <code>cron</code> cannot have like job naming, individual editing of timing elements, separate logs for each job without having to add an output redirect within the command, and a log that doesn't default to the system mail utility.</p>
     <h2>Usage</h2>
     <p>Run <code>mycronmanage</code> to create and update jobs. Run <code>mycron</code> via your favorite init system. Currently only non-root users are supported.</p>
-  </body>
+    </body>
 </html>
