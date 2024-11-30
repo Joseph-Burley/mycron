@@ -6,10 +6,10 @@ A utility for running repeated jobs with an interface that doesn't require editi
 
 ## usage
 
-coming soon
+Run `mycronmanage` to create and update jobs. Run `mycron` via your favorite init system. Currently only non-root users are supported.
 
 ## features
 
-- [ ] Named jobs
-- [ ] Edit execution time individually by minute, hour, day, and month
-- [ ] Built-in logging
+- [x] Named jobs
+- [x] Edit execution time individually by minute, hour, day, and month
+- [x] Built-in logging
