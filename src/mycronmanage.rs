@@ -36,8 +36,7 @@ struct EditJob {
     #[arg(short, long)]
     command: Option<String>,
 
-    //todo: The best way to do this is probably to take a single string and slice it later.
-    //trying to have clap do it runs into issues with flags.
+    //arguments to the job
     #[arg(short, long, value_delimiter=',', value_terminator=";", num_args=1..)]
     setargs: Vec<String>,
 
@@ -173,7 +172,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     //if load settings fails (probably because the file doesn't exist) create it.
     let mut system_settings = Settings::load_settings().or(Settings::create_settings()).unwrap();
 
-    //TODO allow editing a job to use the default log location
     match args.subcommand {
         Clisub::Edit(j) => {
             println!("Editing a job: {:?}", j);

@@ -66,15 +66,7 @@ fn main() {
         let output = serde_yaml_ng::to_string(&empty_job_list).unwrap();
         fs::write(&file_path, &output).unwrap();
     }
-    //TODO create file with no jobs if none exists DONE
-    //TODO check if mycron is already running DONE
-    //TODO allow for multiple list files (abandoned)
-    //TODO add default log location for jobs (mycronmanage?)
-    //TODO change log format to use date-time (set_time_level) DONE
-    //TODO use enums for thread signaling instead of integers DONE
-    //TODO maybe add default log location? DONE
-
-
+    
     let (tx, rx) = mpsc::channel::<Signal>();
     let other_tx = tx.clone();
     start_watch(&file_path, tx);
