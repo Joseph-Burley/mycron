@@ -1,10 +1,7 @@
-mod user_jobs;
-mod settings;
+use mycron::{settings::Settings, user_jobs::*};
 use std::error::Error;
 use std::result::Result;
 use clap::*;
-use settings::Settings;
-use user_jobs::*;
 use directories::ProjectDirs;
 use std::fs;
 use std::path::PathBuf;

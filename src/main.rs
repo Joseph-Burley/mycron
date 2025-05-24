@@ -1,18 +1,21 @@
-mod user_jobs;
+//mod user_jobs;
 mod cron_tab_wrapper;
-mod settings;
+//mod settings;
+mod file_watcher;
+mod signal;
 extern crate simplelog;
 use cron_tab_wrapper::create_job;
-use settings::Settings;
-use user_jobs::*;
+use mycron::settings::Settings;
+use mycron::user_jobs::*;
 use directories::ProjectDirs;
 use std::fs::{self, File};
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::process;
-use chrono:: Utc;
-use mycron::file_watcher::start_watch;
-use mycron::Signal;
+use chrono::Utc;
+use file_watcher::start_watch;
+use signal::*;
+
 use simplelog::*;
 #[macro_use] extern crate log;
 
