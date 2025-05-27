@@ -7,7 +7,6 @@ use std::path::PathBuf;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {
     pub command: String,
-    pub arguments: Vec<String>,
     pub log_location: String
 }
 
@@ -18,7 +17,6 @@ impl Default for JobParams {
         def_log.push("mycron_logs/default.log");
         JobParams {
             command: String::from(""),
-            arguments: Vec::<String>::new(),
             log_location: String::from(def_log.to_str().unwrap()),
         }
     }
@@ -26,7 +24,7 @@ impl Default for JobParams {
 
 impl JobParams {
     pub fn full_command(&self) -> String {
-        format!("{} {}\n\tLog Location: {}", self.command, self.arguments.join(" "), self.log_location)
+        format!("{} \n\tLog Location: {}", self.command, self.log_location)
     }
 
     pub fn set_log(&mut self, p: &Path) {

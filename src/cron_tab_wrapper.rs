@@ -15,7 +15,11 @@ pub fn create_job(job: Job, cron: &mut Cron<Utc>, default_log_loc: &String) -> R
     if !output_loc.exists() {
         fs::write(&output_loc, "").unwrap();
     }
-    let h = cron.add_fn(&job.timing.full_timing(), move || execute_job(&job.name, &job.params, &output_loc).unwrap()).unwrap();
+    let h = cron.add_fn(&job.timing.full_timing(), 
+        move || execute_job(&job.name, &job.params, &output_loc).map_err(|e| {
+            error!("Error when execution a job: {:?}", e);
+            e
+        }).expect("something went wrong executing a job")).unwrap();
     debug!("Adding job: {}", h);
     Ok(h)
 }
@@ -23,6 +27,7 @@ pub fn create_job(job: Job, cron: &mut Cron<Utc>, default_log_loc: &String) -> R
 
 fn execute_job(name: &String, params: &JobParams, output_loc: &PathBuf) -> core::result::Result<(), Box<dyn Error>> {
     info!("Running: {}", name);
+    debug!("command: {}", params.command);
     let output = Command::new("sh")
                                 .arg("-c")
                                 .arg(&params.command)

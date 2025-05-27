@@ -36,10 +36,6 @@ struct EditJob {
     #[arg(short, long)]
     command: Option<String>,
 
-    //arguments to the job
-    #[arg(short, long, value_delimiter=',', value_terminator=";", num_args=1..)]
-    setargs: Vec<String>,
-
     ///Set the output location. Use "default" to use the system default.
     #[arg(short, long)]
     log: Option<String>
@@ -202,10 +198,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                     if j.command.is_some() {
                         actualjob.params.command = j.command.unwrap();
-                    }
-
-                    if j.setargs.len() > 0 {
-                        actualjob.params.arguments = j.setargs;
                     }
 
                     if j.log.is_some() {
