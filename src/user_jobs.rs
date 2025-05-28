@@ -95,6 +95,7 @@ pub struct Job {
     pub name: String,
     pub timing: Timing,
     pub params: JobParams,
+    pub enable: bool,
 }
 
 impl Job {
@@ -102,7 +103,8 @@ impl Job {
         Job {
             name: n.to_string(),
             timing: Timing::default(),
-            params: JobParams::default()
+            params: JobParams::default(),
+            enable: false
         }
     }
 }

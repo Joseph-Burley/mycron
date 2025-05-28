@@ -16,6 +16,10 @@ struct EditJob {
     #[arg(short, long)]
     name: String,
 
+    ///Set job to run
+    #[arg(short, long)]
+    enable: Option<bool>,
+
     ///Set the minute argument of the cron expression
     #[arg(long)]
     minute: Option<String>,
@@ -48,6 +52,10 @@ struct NewJob {
     ///The name of the new job
     #[arg(short, long)]
     name: String,
+
+    ///Set to run job
+    #[arg(short, long)]
+    enable: Option<bool>,
 
     ///Set the minute argument of the cron expression
     #[arg(long)]
@@ -176,6 +184,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             match job {
                 None => println!("The job {} was not found", j.name),
                 Some(actualjob) => {
+                    if j.enable.is_some() {
+                        actualjob.enable = j.enable.unwrap();
+                    }
+
                     if j.minute.is_some() {
                         actualjob.timing.set_minute(j.minute.unwrap());
                     }
@@ -223,6 +235,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("Creating a new job: {:?}", j);
             let mut jl = load_from_file()?;
             let mut new_job = Job::new(&j.name);
+
+            if j.enable.is_some() {
+                new_job.enable = j.enable.unwrap();
+            }
 
             if j.minute.is_some() {
                 new_job.timing.set_minute(j.minute.unwrap());
