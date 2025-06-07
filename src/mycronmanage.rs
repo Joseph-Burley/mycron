@@ -42,7 +42,11 @@ struct EditJob {
 
     ///Set the output location. Use "default" to use the system default.
     #[arg(short, long)]
-    log: Option<String>
+    log: Option<String>,
+
+    ///Set if the output should overwrite the log file or append to it
+    #[arg(short, long)]
+    log_append: Option<bool>,
 }
 
 ///Create a new job
@@ -80,6 +84,10 @@ struct NewJob {
     ///Set the output location
     #[arg(short, long)]
     log: Option<String>,
+
+    ///Set if the output should overwrite the log file or append to it
+    #[arg(short, long)]
+    log_append: Option<bool>,
 }
 
 ///Remove a job
@@ -226,6 +234,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                         actualjob.params.set_log(&p);
                     }
 
+                    if j.log_append.is_some() {
+                        actualjob.params.log_append = j.log_append.unwrap();
+                    }
+
                     write_to_file(jl)?;
                 }
             };
@@ -279,6 +291,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             };
             new_job.params.set_log(&log_path);
+
+            if j.log_append.is_some() {
+                new_job.params.log_append = j.log_append.unwrap();
+            }
 
             jl.jobs.push(new_job);
             write_to_file(jl)?;

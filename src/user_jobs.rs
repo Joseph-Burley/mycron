@@ -7,7 +7,8 @@ use std::path::PathBuf;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JobParams {
     pub command: String,
-    pub log_location: String
+    pub log_location: String,
+    pub log_append: bool,
 }
 
 impl Default for JobParams {
@@ -18,6 +19,7 @@ impl Default for JobParams {
         JobParams {
             command: String::from(""),
             log_location: String::from(def_log.to_str().unwrap()),
+            log_append: true,
         }
     }
 }

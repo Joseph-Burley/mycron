@@ -36,6 +36,8 @@ fn execute_job(name: &String, params: &JobParams, output_loc: &PathBuf) -> core:
                                     error!("Error when running command: {:?}", e);
                                     e
                                 })?;
+    //TODO rewrite this to use log_append from params
+    //this may require using std::io in addition to std::fs
     fs::write(&output_loc, output.stdout).map_err(|e| {
         error!("Could not write to log location: {:?}", e);
         e
