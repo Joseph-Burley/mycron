@@ -45,7 +45,7 @@ struct EditJob {
     log: Option<String>,
 
     ///Set if the output should overwrite the log file or append to it
-    #[arg(short, long)]
+    #[arg(long)]
     log_append: Option<bool>,
 }
 
@@ -86,7 +86,7 @@ struct NewJob {
     log: Option<String>,
 
     ///Set if the output should overwrite the log file or append to it
-    #[arg(short, long)]
+    #[arg(long)]
     log_append: Option<bool>,
 }
 

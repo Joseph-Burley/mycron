@@ -1,6 +1,7 @@
 use cron_tab::*;
 use chrono::Utc;
 use crate::{Job, JobParams};
+use std::io::Write;
 use std::process::Command;
 use std::fs;
 use std::path::PathBuf;
@@ -38,13 +39,25 @@ fn execute_job(name: &String, params: &JobParams, output_loc: &PathBuf) -> core:
                                 })?;
     //TODO rewrite this to use log_append from params
     //this may require using std::io in addition to std::fs
+    /*
     fs::write(&output_loc, output.stdout).map_err(|e| {
+        error!("Could not write to log location: {:?}", e);
+        e
+    })?;
+    */
+    //consider using match to select append or truncate?
+    let mut file = match params.log_append {
+        true => fs::OpenOptions::new().create(true).append(true).open(&output_loc).unwrap(),
+        false => fs::OpenOptions::new().create(true).write(true).truncate(true).open(&output_loc).unwrap()
+    };
+    //let mut file = fs::OpenOptions::new().create(true).write(true).append(params.log_append).open(&output_loc).unwrap();
+    file.write(&output.stdout).map_err(|e| {
         error!("Could not write to log location: {:?}", e);
         e
     })?;
 
     if output.stderr.len() > 0 {
-        info!("The job \"{}\" encountered and error", name);
+        info!("The job \"{}\" encountered an error", name);
         let mut error_path = PathBuf::from(&output_loc);
         error_path.pop();
         error_path.push("error.log");
