@@ -84,13 +84,15 @@ fn main() {
         println!("Starting cron");
 
         debug!("started reading from file");
-        //read from file
+        //read from file and filter enabled jobs
         let input = fs::read_to_string(&file_path).unwrap();
         let new_jobs: JobList = serde_yaml_ng::from_str(&input).unwrap();
         debug!("Job count: {}", new_jobs.jobs.len());
+        let enabled_jobs: Vec<_> = new_jobs.jobs.into_iter().filter(|j| j.enable).collect();
+        debug!("{} jobs are enabled", enabled_jobs.len());
         debug!("creating crontabs");
         
-        for j in new_jobs.jobs {
+        for j in enabled_jobs {
             match create_job(j, &mut cron, &system_settings.get_job_log()) {
                 Ok(h) => job_handles.push(h),
                 Err(e) => {
