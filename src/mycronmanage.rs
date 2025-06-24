@@ -1,11 +1,10 @@
-use mycron::{settings::Settings, user_jobs::*};
-use std::error::Error;
-use std::result::Result;
 use clap::*;
 use directories::ProjectDirs;
+use mycron::{settings::Settings, user_jobs::*};
+use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
-
+use std::result::Result;
 
 //Structs for parser
 ///Edit a job
@@ -96,7 +95,7 @@ struct NewJob {
 struct RemoveJob {
     ///Name of job to remove
     #[arg(short, long)]
-    name: String
+    name: String,
 }
 
 ///Change the default settings used by mycron
@@ -107,6 +106,8 @@ struct ChangeSettings {
     syslog: Option<String>,
     #[arg(short, long)]
     joblog: Option<String>,
+    #[arg(short, long, default_value_t = false)]
+    list: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -121,7 +122,7 @@ enum Clisub {
 
 ///mycronmanage - Add and edit jobs run by mycron and edit mycron settings
 #[derive(Parser, Debug)]
-struct Args{
+struct Args {
     #[command(subcommand)]
     subcommand: Clisub,
 }
@@ -129,8 +130,8 @@ struct Args{
 
 fn load_from_file() -> Result<JobList, Box<dyn Error>> {
     let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => {return Result::Err(String::from("Could not find project directory").into())},
-        Some(f) => f
+        None => return Result::Err(String::from("Could not find project directory").into()),
+        Some(f) => f,
     };
     let mut file = PathBuf::from(data_dir.data_dir());
     file.push("list.yaml");
@@ -141,8 +142,8 @@ fn load_from_file() -> Result<JobList, Box<dyn Error>> {
 
 fn write_to_file(jl: JobList) -> Result<(), Box<dyn Error>> {
     let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => {return Result::Err(String::from("Could not find project directory").into())},
-        Some(f) => f
+        None => return Result::Err(String::from("Could not find project directory").into()),
+        Some(f) => f,
     };
     let mut file = PathBuf::from(data_dir.data_dir());
     file.push("list.yaml");
@@ -153,8 +154,8 @@ fn write_to_file(jl: JobList) -> Result<(), Box<dyn Error>> {
 
 fn check_file() -> Result<bool, Box<dyn Error>> {
     let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => {return Result::Err(String::from("Could not find project directory").into())},
-        Some(f) => f
+        None => return Result::Err(String::from("Could not find project directory").into()),
+        Some(f) => f,
     };
     let mut file = PathBuf::from(data_dir.data_dir());
     file.push("list.yaml");
@@ -163,8 +164,8 @@ fn check_file() -> Result<bool, Box<dyn Error>> {
 
 fn create_blank_file() -> Result<(), Box<dyn Error>> {
     let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => {return Result::Err(String::from("Could not find project directory").into())},
-        Some(f) => f
+        None => return Result::Err(String::from("Could not find project directory").into()),
+        Some(f) => f,
     };
     let mut file = PathBuf::from(data_dir.data_dir());
     file.push("list.yaml");
@@ -182,7 +183,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     //if load settings fails (probably because the file doesn't exist) create it.
-    let mut system_settings = Settings::load_settings().or(Settings::create_settings()).unwrap();
+    let mut system_settings = Settings::load_settings()
+        .or(Settings::create_settings())
+        .unwrap();
 
     match args.subcommand {
         Clisub::Edit(j) => {
@@ -223,7 +226,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     if j.log.is_some() {
                         let val = j.log.unwrap();
                         let p: PathBuf = if val.eq_ignore_ascii_case("default") {
-                            println!("using default log location: {}", system_settings.get_job_log());
+                            println!(
+                                "using default log location: {}",
+                                system_settings.get_job_log()
+                            );
                             PathBuf::from(system_settings.get_job_log())
                         } else {
                             PathBuf::from(val)
@@ -241,8 +247,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     write_to_file(jl)?;
                 }
             };
-
-        },
+        }
         Clisub::New(j) => {
             println!("Creating a new job: {:?}", j);
             let mut jl = load_from_file()?;
@@ -255,7 +260,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             if j.minute.is_some() {
                 new_job.timing.set_minute(j.minute.unwrap());
             }
-            
+
             if j.hour.is_some() {
                 new_job.timing.set_hour(j.hour.unwrap());
             }
@@ -283,7 +288,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         fs::File::create_new(&p).unwrap();
                     }
                     p
-                },
+                }
                 None => {
                     let mut p = PathBuf::from(system_settings.get_job_log());
                     p.push(format!("{}.log", new_job.name));
@@ -298,7 +303,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             jl.jobs.push(new_job);
             write_to_file(jl)?;
-        },
+        }
         Clisub::Remove(j) => {
             let mut jl = load_from_file()?;
             let job_index = jl.find_name_index(&j.name);
@@ -309,50 +314,39 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
             write_to_file(jl)?;
-        },
-        Clisub::Settings(s) =>
-        {
-            println!("Editing settings: {:?}", s);
-            let mut no_error = true;
-            /*
-            let mut current_setting = Settings::load_settings().unwrap_or_default();
-            if s.syslog.is_some() {
-                let new_log = PathBuf::from(s.syslog.unwrap());
-                match current_setting.set_system_log(&new_log) {
-                    Ok(_) => {},
-                    Err(e) => {
-                        println!("Setting system log failed: {}", e);
-                        no_error = false;
-                    }
-                }
-            }
-            */
-
-            if s.joblog.is_some() {
-                let new_log = PathBuf::from(s.joblog.unwrap());
-                match system_settings.set_job_log(&new_log) {
-                    Ok(_) => {},
-                    Err(e) => {
-                        println!("Setting job log location failed: {}", e);
-                        no_error = false;
-                    }
-                }
-            }
-
-            if no_error {
-                Settings::save_settings(&system_settings).unwrap();
+        }
+        Clisub::Settings(s) => {
+            //Note: settings were already loaded or created before the match
+            if s.list {
+                println!("The current settings:\n{}", system_settings);
             } else {
-                println!("Errors encountered while applying settings. Settings not changed");
+                println!("Editing settings: {:?}", s);
+                let mut no_error = true;
+
+                if s.joblog.is_some() {
+                    let new_log = PathBuf::from(s.joblog.unwrap());
+                    match system_settings.set_job_log(&new_log) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Setting job log location failed: {}", e);
+                            no_error = false;
+                        }
+                    }
+                }
+
+                if no_error {
+                    Settings::save_settings(&system_settings).unwrap();
+                } else {
+                    println!("Errors encountered while applying settings. Settings not changed");
+                }
             }
-            
-        },
+        }
         Clisub::List => {
             let job_list = load_from_file()?;
 
-            let name_list: Vec<String> = job_list.jobs.iter().map(
-                |x| format!("{}", x)).collect();
+            let name_list: Vec<String> = job_list.jobs.iter().map(|x| format!("{}", x)).collect();
             println!("List of jobs:\n\t{}", name_list.join(",\n\t"));
-        },
+        }
     }
 
     Ok(())

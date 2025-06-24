@@ -2,6 +2,7 @@ use directories::ProjectDirs;
 use std::path::{Path, PathBuf};
 use std::fs;
 use std::error::Error;
+use std::fmt;
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,6 +27,12 @@ impl Default for Settings {
             job_log: job_log_path.into_os_string().into_string().unwrap(),
             job_file: def_job_file.into_os_string().into_string().unwrap()
         }
+    }
+}
+
+impl fmt::Display for Settings {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "System Log: {}\nJob Log: {}\nJob File: {}", self.system_log, self.job_log, self.job_file)
     }
 }
 
