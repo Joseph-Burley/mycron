@@ -10,7 +10,7 @@ use mycron::user_jobs::*;
 use directories::ProjectDirs;
 use std::fs::{self, File};
 use std::path::PathBuf;
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc};
 use std::process;
 use chrono::Utc;
 use file_watcher::start_watch;
@@ -31,6 +31,17 @@ fn main() {
         return;
     }
     let _ = fs::write(&pid_path, format!("{}\n", process::id()));
+
+    //ARCs for using pid_path in both the panic and ctrl_c handlers
+    let pid_arc = Arc::new(pid_path);
+    let panic_arc = Arc::clone(&pid_arc);
+    let ctrl_c_arc = Arc::clone(&pid_arc);
+
+    //setting panic handler hook to remove .pid file
+    std::panic::set_hook(Box::new(move |panic_info| {
+        let _ = fs::remove_file(&*panic_arc);
+        eprintln!("The custom panic hook was triggered with error: {:?}", panic_info);
+    }));
 
     //load system settings
     let system_settings = match Settings::load_settings(){
@@ -76,7 +87,7 @@ fn main() {
     let mut should_continue = true;
     ctrlc::set_handler(move || {
         other_tx.send(Signal::Stop).unwrap();
-        let _ = fs::remove_file(&pid_path);
+        let _ = fs::remove_file(&*ctrl_c_arc);
     })
     .expect("Error setting Ctrl-C handler");
 
