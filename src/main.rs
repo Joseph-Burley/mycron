@@ -104,7 +104,7 @@ fn main() {
         debug!("creating crontabs");
         
         for j in enabled_jobs {
-            match create_job(j, &mut cron, &system_settings.get_job_log()) {
+            match create_job(j, &mut cron) {
                 Ok(h) => job_handles.push(h),
                 Err(e) => {
                     error!("Got an error while adding a cronjob: {:?}", e);

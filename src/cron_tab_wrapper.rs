@@ -7,7 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::error::Error;
 
-pub fn create_job(job: Job, cron: &mut Cron<Utc>, default_log_loc: &String) -> Result<usize> { //or cron error
+pub fn create_job(job: Job, cron: &mut Cron<Utc>) -> Result<usize> { //or cron error
     let h = cron.add_fn(&job.timing.full_timing(), 
         move || execute_job(&job.name, &job.params).map_err(|e| {
             error!("Error when execution a job: {:?}", e);
