@@ -3,7 +3,7 @@ use directories::ProjectDirs;
 use mycron::{settings::Settings, user_jobs::*};
 use std::error::Error;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::result::Result;
 
 //Structs for parser
@@ -128,59 +128,31 @@ struct Args {
 }
 //--------------------------------------
 
-fn load_from_file() -> Result<JobList, Box<dyn Error>> {
-    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => return Result::Err(String::from("Could not find project directory").into()),
-        Some(f) => f,
-    };
-    let mut file = PathBuf::from(data_dir.data_dir());
-    file.push("list.yaml");
-    let input_string = fs::read_to_string(&file)?;
+fn load_from_file(p: PathBuf) -> Result<JobList, Box<dyn Error>> {
+    let input_string = fs::read_to_string(&p)?;
     let jobs: JobList = serde_yaml_ng::from_str(&input_string)?;
     return Result::Ok(jobs);
 }
 
-fn write_to_file(jl: JobList) -> Result<(), Box<dyn Error>> {
-    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => return Result::Err(String::from("Could not find project directory").into()),
-        Some(f) => f,
-    };
-    let mut file = PathBuf::from(data_dir.data_dir());
-    file.push("list.yaml");
+fn write_to_file(jl: JobList, p: PathBuf) -> Result<(), Box<dyn Error>> {
     let output = serde_yaml_ng::to_string(&jl)?;
-    fs::write(&file, &output)?;
+    fs::write(&p, &output)?;
     Ok(())
 }
 
-fn check_file() -> Result<bool, Box<dyn Error>> {
-    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => return Result::Err(String::from("Could not find project directory").into()),
-        Some(f) => f,
-    };
-    let mut file = PathBuf::from(data_dir.data_dir());
-    file.push("list.yaml");
-    return Ok(file.exists());
+fn check_file(p: PathBuf) -> Result<bool, Box<dyn Error>> {
+    return Ok(p.is_file());
 }
 
-fn create_blank_file() -> Result<(), Box<dyn Error>> {
-    let data_dir = match ProjectDirs::from("com", "mycron", "mycron") {
-        None => return Result::Err(String::from("Could not find project directory").into()),
-        Some(f) => f,
-    };
-    let mut file = PathBuf::from(data_dir.data_dir());
-    file.push("list.yaml");
+fn create_blank_file(p: PathBuf) -> Result<(), Box<dyn Error>> {
     let job_list = JobList::default();
-    fs::write(file, "")?;
-    write_to_file(job_list)?;
+    //fs::write(p, "")?;
+    write_to_file(job_list, p)?;
     Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
-
-    if !check_file()? {
-        create_blank_file()?;
-    }
 
     //if load settings fails (probably because the file doesn't exist) create it.
     /*
@@ -201,10 +173,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     };
 
+    if !check_file(PathBuf::from(system_settings.get_job_file()))? {
+        create_blank_file(PathBuf::from(system_settings.get_job_file()))?;
+    }
+
     match args.subcommand {
         Clisub::Edit(j) => {
             println!("Editing a job: {:?}", j);
-            let mut jl = load_from_file()?;
+            let mut jl = load_from_file(PathBuf::from(system_settings.get_job_file()))?;
             let job = jl.find_name_mut(&j.name);
             match job {
                 None => println!("The job {} was not found", j.name),
@@ -258,13 +234,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                         actualjob.params.log_append = j.log_append.unwrap();
                     }
 
-                    write_to_file(jl)?;
+                    write_to_file(jl, PathBuf::from(system_settings.get_job_file()))?;
                 }
             };
         }
         Clisub::New(j) => {
             println!("Creating a new job: {:?}", j);
-            let mut jl = load_from_file()?;
+            let mut jl = load_from_file(PathBuf::from(system_settings.get_job_file()))?;
             let mut new_job = Job::new(&j.name);
 
             if j.enable.is_some() {
@@ -316,10 +292,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
 
             jl.jobs.push(new_job);
-            write_to_file(jl)?;
+            write_to_file(jl, PathBuf::from(system_settings.get_job_file()))?;
         }
         Clisub::Remove(j) => {
-            let mut jl = load_from_file()?;
+            let mut jl = load_from_file(PathBuf::from(system_settings.get_job_file()))?;
             let job_index = jl.find_name_index(&j.name);
             match job_index {
                 None => println!("Job not found in list"),
@@ -327,7 +303,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     jl.jobs.remove(i);
                 }
             }
-            write_to_file(jl)?;
+            write_to_file(jl, PathBuf::from(system_settings.get_job_file()))?;
         }
         Clisub::Settings(s) => {
             //Note: settings were already loaded or created before the match
@@ -356,7 +332,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
         Clisub::List => {
-            let job_list = load_from_file()?;
+            let job_list = load_from_file(PathBuf::from(system_settings.get_job_file()))?;
 
             let name_list: Vec<String> = job_list.jobs.iter().map(|x| format!("{}", x)).collect();
             println!("List of jobs:\n\t{}", name_list.join(",\n\t"));
