@@ -135,4 +135,8 @@ impl JobList {
     pub fn find_name_index(&self, n: &str) -> Option<usize> {
         self.jobs.iter().position(|i| i.name.eq(n))
     }
+
+    pub fn has_name(&self, n: &str) -> bool {
+        self.jobs.iter().any(|j| String::eq(&j.name, n))
+    }
 }

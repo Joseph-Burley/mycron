@@ -1,5 +1,4 @@
 use clap::*;
-use directories::ProjectDirs;
 use mycron::{settings::Settings, user_jobs::*};
 use std::error::Error;
 use std::fs;
@@ -146,20 +145,12 @@ fn check_file(p: PathBuf) -> Result<bool, Box<dyn Error>> {
 
 fn create_blank_file(p: PathBuf) -> Result<(), Box<dyn Error>> {
     let job_list = JobList::default();
-    //fs::write(p, "")?;
     write_to_file(job_list, p)?;
     Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
-
-    //if load settings fails (probably because the file doesn't exist) create it.
-    /*
-    let mut system_settings = Settings::load_settings()
-        .or(Settings::create_settings())
-        .unwrap();
-    */
 
     let mut system_settings = match Settings::load_settings() {
         Err(e) => {
@@ -291,8 +282,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                 new_job.params.log_append = j.log_append.unwrap();
             }
 
-            jl.jobs.push(new_job);
-            write_to_file(jl, PathBuf::from(system_settings.get_job_file()))?;
+            if !jl.has_name(&new_job.name){
+                jl.jobs.push(new_job);
+                write_to_file(jl, PathBuf::from(system_settings.get_job_file()))?;
+            } else {
+                println!("The job name '{}' already exists. The new job was not created.", new_job.name);
+            }
         }
         Clisub::Remove(j) => {
             let mut jl = load_from_file(PathBuf::from(system_settings.get_job_file()))?;
