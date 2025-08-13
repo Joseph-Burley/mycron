@@ -183,9 +183,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     //if load settings fails (probably because the file doesn't exist) create it.
+    /*
     let mut system_settings = Settings::load_settings()
         .or(Settings::create_settings())
         .unwrap();
+    */
+
+    let mut system_settings = match Settings::load_settings() {
+        Err(e) => {
+            println!("An error was encountered while loading settings: {:?}", e);
+            println!("loading default settings");
+            Settings::create_settings().unwrap() //note: create_settings calls save_settings
+            },
+        Ok(s) => {
+            println!("Settings loaded successfully");
+            s
+        }
+    };
 
     match args.subcommand {
         Clisub::Edit(j) => {
