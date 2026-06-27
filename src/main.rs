@@ -66,6 +66,8 @@ fn main() {
     //load job lists
     let mut file_path = PathBuf::from(system_settings.get_job_file());
     //does the directory exist
+    info!("The file path from the settings is: {:?}", file_path);
+    println!("basic debug. the file path from the settings is: {:?}", file_path);
     if !file_path.exists(){
         fs::create_dir_all(&file_path).unwrap();
     }
