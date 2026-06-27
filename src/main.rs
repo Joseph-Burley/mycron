@@ -71,7 +71,7 @@ fn main() {
     if !file_path.exists(){
         fs::create_dir_all(&file_path).unwrap();
     }
-    file_path.push("list.yaml");
+    //file_path.push("list.yaml");
     if !file_path.exists(){
         info!("List file does not exist. Creating blank file");
         File::create(&file_path).unwrap();
