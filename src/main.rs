@@ -64,12 +64,14 @@ fn main() {
     debug!("system settings: {:?}", &system_settings);
 
     //load job lists
-    let mut file_path = PathBuf::from(data_dir.data_dir());
+    let file_path = PathBuf::from(system_settings.get_job_file());
     //does the directory exist
+    info!("The file path from the settings is: {:?}", file_path);
+    println!("basic debug. the file path from the settings is: {:?}", file_path);
     if !file_path.exists(){
         fs::create_dir_all(&file_path).unwrap();
     }
-    file_path.push("list.yaml");
+    
     if !file_path.exists(){
         info!("List file does not exist. Creating blank file");
         File::create(&file_path).unwrap();
