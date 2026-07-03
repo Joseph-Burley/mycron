@@ -2,7 +2,7 @@ use clap::*;
 use mycron::{settings::Settings, user_jobs::*};
 use std::error::Error;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use std::result::Result;
 
 //Structs for parser
